@@ -1,22 +1,68 @@
-import {Button, Input, Link} from "@nextui-org/react";
+import {Input, Link} from "@nextui-org/react";
 
 import {useState} from "react";
+import { PlusOutlined } from "@ant-design/icons";
 
 import { TypeAnimation } from 'react-type-animation';
 import {EyeSlashFilledIcon} from "../../iconsNextUI/EyeSlashFilledIcon.tsx";
 import {EyeFilledIcon} from "../../iconsNextUI/EyeFilledIcon.tsx";
 import {MailIcon} from "../../iconsNextUI/MailIcon.tsx";
 import {UserIcon} from "../../iconsNextUI/UserIcon.tsx";
+import {useNavigate} from "react-router-dom";
+import {Form, Modal, Upload, UploadFile, UploadProps} from "antd";
+import {imageConverter} from "../interfaces/imageconvert.ts";
+import { Button } from "antd";
+import {IRegisterForm} from "../interfaces/auth.ts";
+import axios from "axios";
 
 export default function RegisterPage() {
-
+    const navigator = useNavigate();
     const [isVisible, setIsVisible] = useState(false);
+    const [file, setFile] = useState<UploadFile | null>();
+    const [previewOpen, setPreviewOpen] = useState<boolean>(false);
+    const [previewImage, setPreviewImage] = useState("");
+    const [previewTitle, setPreviewTitle] = useState("");
+    const handleChange: UploadProps["onChange"] = ({ fileList: newFile }) => {
+        const newFileList = newFile.slice(-1);
+        setFile(newFileList[0]);
+    };
+
+    const handlePreview = async (file: UploadFile) => {
+        if (!file.url && !file.preview) {
+            // If the file doesn't have a URL or preview, set the preview using the originFileObj
+            file.preview = URL.createObjectURL(file.originFileObj as File);
+        }
+
+        setPreviewImage(file.url || (file.preview as string));
+        setPreviewOpen(true);
+        setPreviewTitle(file.name || file.url!.substring(file.url!.lastIndexOf("/") + 1));
+    };
 
     const toggleVisibility = () => setIsVisible(!isVisible);
 
+    function handleCancel() {
+        navigator(-1);
+    }
+    const onFinish = async (values: IRegisterForm) => {
+        console.log(values.imagePath);
+        try {
+            // Register user
+            await axios.post("https://localhost:7101/api/PostImages/CreateUserImage", values.imagePath, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+
+            });
+
+        }
+        catch (error) {
+        console.error("Registration failed", error);
+    }
+    };
+
     return (
         <div className={"bg-pink-100 font-serif h-screen"}>
-            <div className="isolate px-6 py-24 sm:py-32 lg:px-8">
+            <div className="isolate mt-16">
                 <div
                     className="absolute inset-x-0 top-[-10rem]  -z-10 transform-gpu overflow-hidden blur-3xl"
                     aria-hidden="true"
@@ -33,7 +79,7 @@ export default function RegisterPage() {
                 <div className="flex min-h-full flex-1 flex-col justify-center lg:px-8">
                     <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                         <img
-                            className="mx-auto h-20 w-auto"
+                            className="mx-auto mt-5 h-20 w-auto"
                             src="logo.png"
                             alt="Your Company"
                         />
@@ -43,12 +89,8 @@ export default function RegisterPage() {
                                     // Same substring at the start will only be typed out once, initially
                                     'nnnnostalgia',
                                     1000, // wait 1s before replacing "Mice" with "Hamsters"
-                                    'notes',
-                                    1000,
-                                    'nexus',
-                                    1000,
-                                    'narrative',
-                                    1000
+                                    'register',
+                                    5000
                                 ]}
                                 speed={30}
                                 className="mt-10 text-center text-5xl  leading-9 tracking-tight text-gray-900"
@@ -60,34 +102,42 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                        <form className="space-y-6" action="#" method="POST">
+                        <Form
+                            onFinish={onFinish}
+                            layout="vertical">
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
                                     //username
                                 </label>
                                 <div className="mt-2">
-                                    <Input type="email"
-                                           placeholder="> ur username"
-                                           startContent={
-                                               <UserIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-                                           }
-                                    />
+                                    <Form.Item name={"username"}>
+                                        <Input type="username"
+                                               placeholder="> ur username"
+                                               startContent={
+                                                   <UserIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
+                                               }
+                                        />
+                                    </Form.Item>
                                 </div>
                             </div>
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+                                <label htmlFor="firstName" className="block text-sm font-medium leading-6 text-gray-900">
                                     //first name
                                 </label>
                                 <div className="mt-2">
-                                    <Input type="email" label="> ur first name"/>
+                                    <Form.Item name={"firstName"}>
+                                        <Input type="firstName" label="> ur first name"/>
+                                    </Form.Item>
                                 </div>
                             </div>
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+                                <label htmlFor="lastName" className="block text-sm font-medium leading-6 text-gray-900">
                                     //last name
                                 </label>
                                 <div className="mt-2">
-                                    <Input type="email" label="> ur last name"/>
+                                    <Form.Item name={"lastName"}>
+                                        <Input type="lastName" label="> ur last name"/>
+                                    </Form.Item>
                                 </div>
                             </div>
                             <div>
@@ -95,14 +145,39 @@ export default function RegisterPage() {
                                     //e-mail
                                 </label>
                                 <div className="mt-2">
-                                    <Input
-                                        type="email"
-                                        placeholder="you@example.com"
-                                        startContent={
-                                            <MailIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-                                        }
-                                    />
+                                    <Form.Item name={"email"}>
+                                        <Input
+                                            type="email"
+                                            placeholder="you@example.com"
+                                            startContent={
+                                                <MailIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
+                                            }
+                                        />
+                                    </Form.Item>
                                 </div>
+                            </div>
+                            <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+                                //avatar
+                            </label>
+                            <div className={"flex flex-col text-center"}>
+                                <Form.Item name={"imagePath"} getValueFromEvent={imageConverter}>
+                                    <Upload
+                                        beforeUpload={() => false}
+                                        maxCount={1}
+                                        listType="picture-card"
+                                        onChange={handleChange}
+                                        onPreview={handlePreview}
+                                        accept="image/*"
+                                    >
+                                        {file ? null :
+                                            (
+                                                <div>
+                                                    <PlusOutlined/>
+                                                    <div style={{marginTop: 8}}>Upload</div>
+                                                </div>)
+                                        }
+                                    </Upload>
+                                </Form.Item>
                             </div>
                             <div>
                                 <div className="flex items-center justify-between">
@@ -111,19 +186,22 @@ export default function RegisterPage() {
                                     </label>
                                 </div>
                                 <div className="mt-2">
-                                    <Input
-                                        label="> ur pass"
-                                        endContent={
-                                            <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
-                                                {isVisible ? (
-                                                    <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-                                                ) : (
-                                                    <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-                                                )}
-                                            </button>
-                                        }
-                                        type={isVisible ? "text" : "password"}
-                                    />
+                                    <Form.Item name={"password"}>
+
+                                        <Input
+                                            label="> ur pass"
+                                            endContent={
+                                                <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
+                                                    {isVisible ? (
+                                                        <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                                                    ) : (
+                                                        <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                                                    )}
+                                                </button>
+                                            }
+                                            type={isVisible ? "text" : "password"}
+                                        />
+                                    </Form.Item>
                                 </div>
                             </div>
                             <div>
@@ -133,44 +211,51 @@ export default function RegisterPage() {
                                     </label>
                                 </div>
                                 <div className="mt-2">
-                                    <Input
-                                        label="> ur pass, again"
-                                        endContent={
-                                            <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
-                                                {isVisible ? (
-                                                    <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-                                                ) : (
-                                                    <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-                                                )}
-                                            </button>
-                                        }
-                                        type={isVisible ? "text" : "password"}
-                                    />
+                                    <Form.Item name={"confirm"}>
+                                        <Input
+                                            label="> ur pass, again"
+                                            endContent={
+                                                <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
+                                                    {isVisible ? (
+                                                        <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                                                    ) : (
+                                                        <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                                                    )}
+                                                </button>
+                                            }
+                                            type={isVisible ? "text" : "password"}
+                                        />
+                                    </Form.Item>
                                 </div>
                             </div>
+                            <Modal
+                                visible={previewOpen}
+                                title={previewTitle}
+                                footer={null}
+                                onCancel={handleCancel}
+                            >
+                                <img alt="example" style={{ width: "100%" }} src={previewImage} />
+                            </Modal>
                             <div>
+                                <Form.Item>
+
+                                    <Button htmlType="submit"
+                                            color="default"
+                                            className="flex h-10 items-center w-full justify-center rounded-md bg-red-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
+                                    >
+                                        Sign up
+                                    </Button>
+                                </Form.Item>
                                 <Button
+                                    onClick={handleCancel}
                                     color="default"
-                                    className="flex w-full justify-center rounded-md bg-red-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
+                                    className="mt-5 h-10 items-center flex w-full justify-center rounded-md bg-gray-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-yellow-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
                                 >
-                                    Sign up
+                                    Cancel
                                 </Button>
                             </div>
-                        </form>
+                        </Form>
 
-                        <p className="mt-10 text-center text-sm text-gray-500">
-                            u r don`t own ur memories?{' '}
-                            <Button
-                                href="https://github.com/nextui-org/nextui"
-                                as={Link}
-                                color="warning"
-                                showAnchorIcon
-                                variant="solid"
-                                className={"h-8"}
-                            >
-                                start now
-                            </Button>
-                        </p>
                     </div>
                 </div>
 
