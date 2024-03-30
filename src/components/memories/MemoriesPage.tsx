@@ -1,17 +1,31 @@
-import {Button, Card, CardFooter, Input, Link, Image, Divider, User, Chip} from "@nextui-org/react";
+import {
+    Button,
+    Card,
+    CardFooter,
+    Input,
+    Link,
+    Image,
+    Divider,
+    User,
+    Chip,
+    Table,
+    TableHeader,
+    TableColumn, TableBody, TableRow, TableCell, Tabs, Tab, CardBody, CardHeader
+} from "@nextui-org/react";
+import {APP_ENV} from "../../env";
 
 import {useEffect, useState} from "react";
 
 import { TypeAnimation } from 'react-type-animation';
-import {EyeSlashFilledIcon} from "../../iconsNextUI/EyeSlashFilledIcon.tsx";
-import {EyeFilledIcon} from "../../iconsNextUI/EyeFilledIcon.tsx";
-import {UserIcon} from "../../iconsNextUI/UserIcon.tsx";
+import {useNavigate} from "react-router-dom";
+import {useAppSelector} from "../../hooks/redux";
 
 export default function MemoriesPage() {
-
+    const {isLogin, isAdmin, user} = useAppSelector(state => state.account);
+    const baseUrl = APP_ENV.BASE_URL;
     const [isVisible, setIsVisible] = useState(false);
     const [users, setUsers] = useState([]);
-
+    const navigator = useNavigate();
     const toggleVisibility = () => setIsVisible(!isVisible);
     useEffect(() => {
         // Fetch users from your API
@@ -21,12 +35,11 @@ export default function MemoriesPage() {
             .catch(error => console.error('Error fetching users:', error));
     }, []); // Empty dependency array means this effect will only run once when the component mounts
 
-
     return (
 
-        <div className={"bg-pink-100 font-serif h-dvh"}>
+        <div className={"bg-pink-100 font-serif  "}>
 
-            <div className={"flex shadow justify-center  mt-16 h-52 bg-[#EDCACF]"}>
+            <div className={"flex border-b border-black shadow justify-center  mt-16 h-52 bg-[#EDCACF]"}>
                 <img
                     className=" mx-auto"
                     src="mainpagehead.png"
@@ -57,11 +70,7 @@ export default function MemoriesPage() {
                     src="mainpagehead.png"
                     alt="Your Company"
                 />
-                <img
-                    className=" mx-auto"
-                    src="mainpagehead.png"
-                    alt="Your Company"
-                />
+
             </div>
             <div className="isolate  mt-5">
                 <div className="flex min-h-full flex-1 flex-col justify-center  lg:px-8">
@@ -89,15 +98,16 @@ export default function MemoriesPage() {
                 </div>
             </div>
             <div className={"mt-5 flex items-center gap-5 justify-center"}>
-                <Chip>Members</Chip>
 
+                <Chip>Members</Chip>
                 {users.map(user => (
                     <User
                         key={user.id} // Ensure each user has a unique key
                         name={user.userName}
                         description={user.email}
                         avatarProps={{
-                            src: "https://i.pravatar.cc/150?u=a04258114e29026702d", // Assuming your user object has an 'avatarUrl' property
+                            src: `${baseUrl}/uploads/${user.imagePath}`,
+                            // Assuming your user object has an 'avatarUrl' property
                         }}
                     />
                 ))}
@@ -110,102 +120,110 @@ export default function MemoriesPage() {
                 {/*/>*/}
             </div>
 
-            <div className=" flex mb-4">
-                <div className="w-1/2 shadow-2xl">
-                    <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                        <form className="space-y-6" action="#" method="POST">
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-                                    username
-                                </label>
-                                <div className="mt-2">
-                                    <Input type="email"
-                                           placeholder="enter ur username"
-                                           startContent={
-                                               <UserIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-                                           }
+            <div className="mt-5 border-t border-black flex  justify-center mb-4">
+                <div className="flex-wrap pt-5 justify-center w-1/2 ">
+                    <div>
+                        <Card className="py-4 m-5">
+                            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+                                <h4 className="font-bold text-large">Write ur first memory!</h4>
+                            </CardHeader>
+                            <CardBody className="overflow-visible py-2">
+                                <Button onClick={() => {navigator("add")}}
+                                        className="flex h-10 items-center w-full justify-center rounded-md bg-red-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
+                                >write</Button>
+                            </CardBody>
+                        </Card>
+                        <Card className="py-4 m-5">
+                            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+                                <h4 className="font-bold text-large">Why should u start write all ur memories?</h4>
+                            </CardHeader>
+                            <CardBody className="overflow-visible py-2">
+                                <div className={"flex gap-5"}>
+                                    <Image
+                                        alt="Card background"
+                                        className="object-cover rounded-xl"
+                                        src="https://i.pinimg.com/564x/c4/d7/b3/c4d7b32db97a7ebb1c5841b63090ed12.jpg"
+                                        width={270}
+                                    />
+                                    <Image
+                                        alt="Card background"
+                                        className="object-cover rounded-xl"
+                                        src="https://i.pinimg.com/564x/56/7b/c8/567bc843e37f04867d825edd28b2fb83.jpg"
+                                        width={270}
                                     />
                                 </div>
-                            </div>
 
-                            <div>
-                                <div className="flex items-center justify-between">
-                                    <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                                        password
-                                    </label>
-                                    <div className="text-sm">
-                                        <a href="#" className="font-semibold underline text-yellow-500 hover:text-pink-300">
-                                            forgot password?
-                                        </a>
-                                    </div>
-                                </div>
-                                <div className="mt-2">
-                                    <Input
-                                        label="enter ur pass"
-                                        endContent={
-                                            <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
-                                                {isVisible ? (
-                                                    <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-                                                ) : (
-                                                    <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-                                                )}
-                                            </button>
-                                        }
-                                        type={isVisible ? "text" : "password"}
-                                    />
-                                </div>
-                            </div>
+                                <p>Writing down memories serves as a powerful tool for self-reflection, personal growth, and preservation of one's life experiences. The act of recording memories not only captures fleeting moments but also solidifies them into tangible artifacts that can be revisited, shared, and cherished for years to come.
 
-                            <div>
-                                <Button
-                                    color="default"
-                                    className="flex w-full justify-center rounded-md bg-red-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
-                                >
-                                    Sign in
-                                </Button>
-                            </div>
-                        </form>
+                                    Firstly, documenting memories allows individuals to reflect on their past experiences, gaining insights into their own development and understanding of the world. Through writing, one can delve into the emotions, thoughts, and lessons learned from various life events, fostering a deeper understanding of oneself and others. This introspective process can lead to personal growth, as individuals recognize patterns, strengths, and areas for improvement within their own lives.
 
-                        <p className="mt-10 text-center text-sm text-gray-500">
-                            u r don`t own ur memories?{' '}
-                            <Button
-                                href="register"
-                                as={Link}
-                                color="warning"
-                                showAnchorIcon
-                                variant="solid"
-                                className={"h-8"}
-                            >
-                                start now
-                            </Button>
-                        </p>
-                        <Divider className="my-4" />
+                                </p>
+                            </CardBody>
+                        </Card>
 
-                        <div className="text-center  flex justify-center mt-5 transform scale-100 hover:scale-110 transition-transform duration-300">
-                            <Card
-                                isFooterBlurred
-                                radius="lg"
-                                className="border-none text-center w-72 "
-                            >
-                                <Image
-                                    alt="Woman listing to music"
-                                    className="object-cover"
-                                    height={400}
-                                    src="https://trello.com/1/cards/65f345f88c7f3935ff51afca/attachments/65f348c2c23aa13401ee717e/previews/65f348c4c23aa13401ee7865/download/nostalgia.png"
-                                    width={400}
-                                />
-                                <CardFooter className="justify-between before:bg-white/10 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-                                    <p className="text-tiny text-white/80">or u can dive into other`s memories</p>
-                                    <Button className="text-tiny text-white bg-black/20" variant="flat" color="default" radius="lg" size="sm">
-                                        take me there
-                                    </Button>
-                                </CardFooter>
-                            </Card>
+                    </div>
+
+
+                </div>
+                <div className="w-1/2 p-5 flex-col border-l border-black  bg-[#EDCACF] justify-center ">
+                    <Table aria-label="Angelic Numbers and Interpretations">
+                        <TableHeader>
+                            <TableColumn>NUMBER</TableColumn>
+                            <TableColumn>INTERPRETATION</TableColumn>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow key="1">
+                                <TableCell>111</TableCell>
+                                <TableCell>Seeing 111 is a call to actively engage in honest dialogues to share your deepest fears and highest hopes. It's about reinforcing trust, especially through challenges.</TableCell>
+                            </TableRow>
+                            <TableRow key="2">
+                                <TableCell>222</TableCell>
+                                <TableCell>When you see 222, it's a reminder to keep the faith and stay focused on your goals. Trust that everything is unfolding as it should and that your patience will be rewarded.</TableCell>
+                            </TableRow>
+                            <TableRow key="3">
+                                <TableCell>333</TableCell>
+                                <TableCell>333 encourages you to embrace your creativity and express yourself authentically. It's a sign that your ideas and talents are needed in the world, so don't hold back.</TableCell>
+                            </TableRow>
+                            <TableRow key="4">
+                                <TableCell>444</TableCell>
+                                <TableCell>Seeing 444 signifies that you are surrounded by angels who are guiding and supporting you. Trust in their presence and know that you are on the right path.</TableCell>
+                            </TableRow>
+                            <TableRow key="5">
+                                <TableCell>555</TableCell>
+                                <TableCell>555 is a message of change and transformation. Embrace the opportunities that come your way and be open to new experiences, as they will lead to growth and expansion.</TableCell>
+                            </TableRow>
+                            <TableRow key="6">
+                                <TableCell>666</TableCell>
+                                <TableCell>When you see 666, it's a reminder to maintain balance and harmony in your life. Pay attention to your thoughts and actions, and strive for alignment with your highest good.</TableCell>
+                            </TableRow>
+                            <TableRow key="7">
+                                <TableCell>777</TableCell>
+                                <TableCell>777 is a sign of spiritual awakening and enlightenment. Trust in your intuition and inner wisdom, and know that you are on the right path toward fulfillment and purpose.</TableCell>
+                            </TableRow>
+                            <TableRow key="8">
+                                <TableCell>888</TableCell>
+                                <TableCell>Seeing 888 signifies abundance and prosperity in all areas of your life. Trust that you are supported by the universe and that your hard work will be rewarded.</TableCell>
+                            </TableRow>
+                            <TableRow key="9">
+                                <TableCell>999</TableCell>
+                                <TableCell>999 encourages you to release the past and embrace new beginnings. Let go of what no longer serves you and trust in the universe's plan for your future.</TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+
+
+                    <div className={"mt-5"}>
+                        <div className={"flex-wrap flex gap-5"}>
+                            <Image width={"300"} src={"https://i.pinimg.com/564x/f7/f6/a1/f7f6a1d3b657441204b3a2cf7ca48e26.jpg"} />
+                            <Image width={"300"} src={"https://i.pinimg.com/564x/2e/71/08/2e7108d8fc1759711bcef93faf7c0ca7.jpg"} />
+                            <Image width={"300"} src={"https://i.pinimg.com/736x/75/38/58/753858ccb5f7dd95133e73fbc7956e97.jpg"} />
+
                         </div>
+
+
                     </div>
 
                 </div>
-                <div className="w-1/2  h-12"></div>
             </div>
         </div>
 

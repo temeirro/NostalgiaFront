@@ -7,6 +7,7 @@ import RegisterPage from "./components/auth/RegisterPage.tsx";
 import DefaultHeader from "./components/containers/DefaultHeader.tsx";
 import AnimatedCursor from "react-animated-cursor";
 import MemoriesPage from "./components/memories/MemoriesPage.tsx";
+import AddMemory from "./components/memories/AddMemory.tsx";
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                 <Route index element={<MemoriesPage/>}/>
                 <Route path="login" element={<LoginPage/>}/>
                 <Route path="register" element={<RegisterPage/>}/>
+                <Route path="add" element={<AddMemory/>}/>
 
 
             </Routes>

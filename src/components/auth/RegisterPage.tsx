@@ -1,8 +1,8 @@
-import {Input, Link} from "@nextui-org/react";
+import {Divider, Input, Link} from "@nextui-org/react";
 
 import {useState} from "react";
 import { PlusOutlined } from "@ant-design/icons";
-
+import {APP_ENV} from "../../env";
 import { TypeAnimation } from 'react-type-animation';
 import {EyeSlashFilledIcon} from "../../iconsNextUI/EyeSlashFilledIcon.tsx";
 import {EyeFilledIcon} from "../../iconsNextUI/EyeFilledIcon.tsx";
@@ -14,14 +14,20 @@ import {imageConverter} from "../interfaces/imageconvert.ts";
 import { Button } from "antd";
 import {IRegisterForm} from "../interfaces/auth.ts";
 import axios from "axios";
-
+import {useAppDispatch} from "../../hooks/redux";
+import {login, register} from "../store/accounts/accounts.actions.ts";
+import {accountsSlice} from "../store/accounts/accounts.slice.ts";
 export default function RegisterPage() {
+
+    const baseUrl = APP_ENV.BASE_URL;
     const navigator = useNavigate();
     const [isVisible, setIsVisible] = useState(false);
     const [file, setFile] = useState<UploadFile | null>();
     const [previewOpen, setPreviewOpen] = useState<boolean>(false);
     const [previewImage, setPreviewImage] = useState("");
     const [previewTitle, setPreviewTitle] = useState("");
+    const dispatch = useAppDispatch();
+
     const handleChange: UploadProps["onChange"] = ({ fileList: newFile }) => {
         const newFileList = newFile.slice(-1);
         setFile(newFileList[0]);
@@ -44,20 +50,26 @@ export default function RegisterPage() {
         navigator(-1);
     }
     const onFinish = async (values: IRegisterForm) => {
-        console.log(values.imagePath);
         try {
-            // Register user
-            await axios.post("https://localhost:7101/api/PostImages/CreateUserImage", values.imagePath, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+            console.log(values);
+            const file = values.imagePath?.originFileObj;
+            const formData = new FormData();
+            formData.append("userName", values.username);
+            formData.append("firstName", values.firstName);
+            formData.append("lastName", values.lastName);
+            formData.append("email", values.email);
+            formData.append("password", values.password);
+            formData.append("role", "user");
+            formData.append("image", file);
+            console.log(formData);
+            await axios.post(`${baseUrl}/api/Accounts/Registration`, formData);
+            await dispatch(login({ userName: values.username, password: values.password }));
 
-            });
-
+            navigator("/");
+        } catch (error) {
+            console.error("Registration failed", error);
         }
-        catch (error) {
-        console.error("Registration failed", error);
-    }
+
     };
 
     return (
@@ -79,8 +91,8 @@ export default function RegisterPage() {
                 <div className="flex min-h-full flex-1 flex-col justify-center lg:px-8">
                     <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                         <img
-                            className="mx-auto mt-5 h-20 w-auto"
-                            src="logo.png"
+                            className="mx-auto mt-5 h-20 w-auto rounded-2xl"
+                            src="https://i.pinimg.com/564x/2b/ae/97/2bae97a9423b958577274993864aa400.jpg"
                             alt="Your Company"
                         />
                         <div className={"text-center mt-5"}>
@@ -98,6 +110,7 @@ export default function RegisterPage() {
                             />
                         </div>
 
+                        <Divider className="my-4"/>
 
                     </div>
 
@@ -106,7 +119,7 @@ export default function RegisterPage() {
                             onFinish={onFinish}
                             layout="vertical">
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+                                <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
                                     //username
                                 </label>
                                 <div className="mt-2">

@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
 body.tutorial {
     --color-text: #fff;
     --color-bg: #171717;

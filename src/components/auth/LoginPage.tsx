@@ -1,7 +1,5 @@
 import {Card, CardFooter, Input, Link, Image, Divider} from "@nextui-org/react";
-
 import {useState} from "react";
-
 import {TypeAnimation} from 'react-type-animation';
 import {EyeSlashFilledIcon} from "../../iconsNextUI/EyeSlashFilledIcon.tsx";
 import {EyeFilledIcon} from "../../iconsNextUI/EyeFilledIcon.tsx";
@@ -9,12 +7,16 @@ import {UserIcon} from "../../iconsNextUI/UserIcon.tsx";
 import {useNavigate} from "react-router-dom";
 import {Button, Form} from "antd";
 import {ILogin, ILoginResult} from "../interfaces/auth.ts";
-import axios from "axios";
+import {APP_ENV} from "../../env";
+import {useAppDispatch} from "../../hooks/redux";
+import {login} from "../store/accounts/accounts.actions.ts";
 
 export default function LoginPage() {
-
+    const baseUrl = APP_ENV.BASE_URL;
     const [isVisible, setIsVisible] = useState(false);
     const navigator = useNavigate();
+    const dispatch = useAppDispatch();
+
     const toggleVisibility = () => setIsVisible(!isVisible);
 
     function handleTake() {
@@ -23,10 +25,10 @@ export default function LoginPage() {
 
     const onFinish = async (values: ILogin) => {
         try {
-            const resp = await axios.post<ILoginResult>("https://localhost:7101/api/Accounts/Login", values);
-            const {token} = resp.data;
-            localStorage.token = token;
+            // const resp = await axios.post<ILoginResult>(`${baseUrl}/api/Accounts/Login`, values);
 
+            const response = await dispatch(login(values));
+            navigator("/");
 
         } catch (ex) {
             console.error('Error during login:', ex);
@@ -54,8 +56,8 @@ export default function LoginPage() {
                 <div className="flex min-h-full flex-1 flex-col justify-center  lg:px-8">
                     <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                         <img
-                            className="mx-auto h-20 w-auto"
-                            src="logo.png"
+                            className="mx-auto h-20 w-auto rounded-xl"
+                            src="https://i.pinimg.com/564x/99/b8/f6/99b8f6812e5d68ef9ae41b82da9a15af.jpg"
                             alt="Your Company"
                         />
                         <div className={"text-center mt-5"}>
@@ -73,6 +75,7 @@ export default function LoginPage() {
                             />
                         </div>
 
+                        <Divider className="my-4"/>
 
                     </div>
 
