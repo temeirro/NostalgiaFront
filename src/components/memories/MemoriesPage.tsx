@@ -10,7 +10,7 @@ import {
     Chip,
     Table,
     TableHeader,
-    TableColumn, TableBody, TableRow, TableCell, Tabs, Tab, CardBody, CardHeader
+    TableColumn, TableBody, TableRow, TableCell, Tabs, Tab, CardBody, CardHeader, Tooltip
 } from "@nextui-org/react";
 import {APP_ENV} from "../../env";
 
@@ -29,45 +29,49 @@ export default function MemoriesPage() {
     const toggleVisibility = () => setIsVisible(!isVisible);
     useEffect(() => {
         // Fetch users from your API
-        fetch('https://localhost:7101/api/Accounts')
+        fetch(`${baseUrl}/api/Accounts`)
             .then(response => response.json())
             .then(data => setUsers(data))
             .catch(error => console.error('Error fetching users:', error));
     }, []); // Empty dependency array means this effect will only run once when the component mounts
 
+    function handleUserClick(id) {
+        navigator(`board/${id}`);
+    }
+
     return (
 
-        <div className={"bg-pink-100 font-serif  "}>
+        <div className={"bg-pink-100 min-h-screen font-serif  "}>
 
             <div className={"flex border-b border-black shadow justify-center  mt-16 h-52 bg-[#EDCACF]"}>
                 <img
                     className=" mx-auto"
-                    src="mainpagehead.png"
+                    src="/mainpagehead.png"
                     alt="Your Company"
                 />
                 <img
                     className=" mx-auto"
-                    src="mainpagehead.png"
+                    src="/mainpagehead.png"
                     alt="Your Company"
                 />
                 <img
                     className=" mx-auto"
-                    src="mainpagehead.png"
+                    src="/mainpagehead.png"
                     alt="Your Company"
                 />
                 <img
                     className=" mx-auto"
-                    src="mainpagehead.png"
+                    src="/mainpagehead.png"
                     alt="Your Company"
                 />
                 <img
                     className=" mx-auto"
-                    src="mainpagehead.png"
+                    src="/mainpagehead.png"
                     alt="Your Company"
                 />
                 <img
                     className=" mx-auto"
-                    src="mainpagehead.png"
+                    src="/mainpagehead.png"
                     alt="Your Company"
                 />
 
@@ -100,16 +104,24 @@ export default function MemoriesPage() {
             <div className={"mt-5 flex items-center gap-5 justify-center"}>
 
                 <Chip>Members</Chip>
+
                 {users.map(user => (
-                    <User
-                        key={user.id} // Ensure each user has a unique key
-                        name={user.userName}
-                        description={user.email}
-                        avatarProps={{
-                            src: `${baseUrl}/uploads/${user.imagePath}`,
-                            // Assuming your user object has an 'avatarUrl' property
-                        }}
-                    />
+
+                            <Tooltip content="click to show board">
+                                <User
+                                    onClick={() => {handleUserClick(user.id)}}
+                                    key={user.id} // Ensure each user has a unique key
+                                    name={user.userName}
+                                    description={user.email}
+                                    avatarProps={{
+                                        src: `${baseUrl}/uploads/${user.imagePath}`,
+                                        // Assuming your user object has an 'avatarUrl' property
+                                    }}
+                                />
+                            </Tooltip>
+
+
+
                 ))}
                 {/*<User*/}
                 {/*    name="Jane Doe"*/}
@@ -120,19 +132,29 @@ export default function MemoriesPage() {
                 {/*/>*/}
             </div>
 
-            <div className="mt-5 border-t border-black flex  justify-center mb-4">
+            <div className="mt-5 border-t border-b border-black flex  justify-center mb-4">
                 <div className="flex-wrap pt-5 justify-center w-1/2 ">
                     <div>
-                        <Card className="py-4 m-5">
+                        {isLogin ? (<Card className="py-4 m-5">
                             <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-                                <h4 className="font-bold text-large">Write ur first memory!</h4>
+                                <h4 className="font-bold text-large">Write ur memory!</h4>
                             </CardHeader>
                             <CardBody className="overflow-visible py-2">
                                 <Button onClick={() => {navigator("add")}}
                                         className="flex h-10 items-center w-full justify-center rounded-md bg-red-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
                                 >write</Button>
                             </CardBody>
-                        </Card>
+                        </Card>) : (<Card className="py-4 m-5">
+                            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+                                <h4 className="font-bold text-large">Please, sign in before uploading your memories!</h4>
+                            </CardHeader>
+                            <CardBody className="overflow-visible py-2">
+                                <Button isDisabled  onClick={() => {navigator("add")}}
+                                        className="flex h-10 items-center w-full justify-center rounded-md bg-red-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
+                                >write</Button>
+                            </CardBody>
+                        </Card>)}
+
                         <Card className="py-4 m-5">
                             <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
                                 <h4 className="font-bold text-large">Why should u start write all ur memories?</h4>

@@ -73,7 +73,7 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className={"bg-pink-100 font-serif h-screen"}>
+        <div className={"bg-pink-100 font-serif min-h-screen"}>
             <div className="isolate mt-16">
                 <div
                     className="absolute inset-x-0 top-[-10rem]  -z-10 transform-gpu overflow-hidden blur-3xl"

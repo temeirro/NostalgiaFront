@@ -26,7 +26,7 @@ const updateUserState = (state: IAccountState, token: string): void => {
     state.token = token;
     state.isLogin = true;
     // Set isAdmin property
-    // state.isAdmin = role.includes('admin');
+    state.isAdmin = Role.toLowerCase() === 'admin';
 
     addLocalStorage('authToken', token);
     http_common.defaults.headers.common["Authorization"] = `Bearer ${token}`;

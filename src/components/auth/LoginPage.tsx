@@ -37,7 +37,7 @@ export default function LoginPage() {
 
     return (
 
-        <div className={"bg-pink-100 font-serif h-dvh"}>
+        <div className={"bg-pink-100 font-serif min-h-screen"}>
 
             <div className="isolate  px-6 py-24 sm:py-32 lg:px-8">
                 <div

@@ -11,8 +11,10 @@ import {Textarea} from "@nextui-org/input";
 import {IImageItem} from "../interfaces/auth.ts";
 import axios from "axios";
 import {APP_ENV} from "../../env";
+import {useAppSelector} from "../../hooks/redux";
 
 export default function AddMemory() {
+    const {isLogin, isAdmin, user} = useAppSelector(state => state.account);
     const baseUrl = APP_ENV.BASE_URL;
     const navigator = useNavigate();
     const [categories, setCategories] = useState([]);
@@ -53,18 +55,28 @@ export default function AddMemory() {
     };
 
     const onFinish = async  (values) => {
+        const tagIds = values.tagIds.split(',').map(tagId => parseInt(tagId.trim())).filter(id => !isNaN(id));
         console.log(values);
+        console.log(tagIds);
+        console.log(user?.Id);
+        const formData = new FormData();
+
+        formData.append("Title", values.title);
+        formData.append("ShortDescription", values.shortDescription);
+        formData.append("Description", values.description);
+        formData.append("CategoryId", values.categoryId);
+        tagIds.forEach(tagId => {
+            formData.append("TagIds", tagId);
+        });
+        formData.append("UserId", user?.Id);
+
+        values.postImages.forEach(pic =>{
+            formData.append("pictures", pic.originFileObj);
+        });
 
 
-            const response = await axios.post(`${baseUrl}/api/Posts/Create`, values, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-            console.log(response.data); // Log response if needed
-
-
-
+            const response = await axios.post(`${baseUrl}/api/Posts/Create`, formData);
+            navigator("/");
     };
 
     const beforeUpload = (file: File) => {
@@ -80,62 +92,13 @@ export default function AddMemory() {
         return isImage && isLt2M;
     };
 
-    const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (e) => {
-        const files = e.target.files;
 
-        if (!files || files.length === 0) {
-            return;
-        }
-        const file = files[0];
-        if (!beforeUpload(file)) {
-            return;
-        }
-        const formData = new FormData();
-        formData.append('ImageFile', file);
-
-        try {
-            const response = await axios.post(`${baseUrl}/api/PostImages/CreateImage`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            setImages((prevPaths) => [...prevPaths, response.data]);
-        } catch (error) {
-            console.error('Error uploading file:', error);
-        }
-    };
-
-    const handleRemove = async (ImagePath: string, e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const currentImage = Images.find((image) => image.imagePath === ImagePath);
-
-        if (currentImage) {
-
-            const newImages = Images.filter((image) => image.imagePath !== ImagePath);
-            setImages(newImages);
-
-            const model: IImageItem = {
-                id: currentImage.id,
-                imagePath: ImagePath
-            }
-            try {
-                await axios.post(`${baseUrl}/api/Image/DeleteImage`, model, {
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                });
-            } catch (error) {
-                console.error('Error uploading file:', error);
-            }
-        };
-    };
 
 
 
     return (
 
-        <div className={"bg-pink-100 font-serif"}>
+        <div className={"bg-pink-100 min-h-screen font-serif"}>
 
             <div className="isolate  px-6 py-24 sm:py-32 lg:px-8">
                 <div
@@ -178,7 +141,7 @@ export default function AddMemory() {
                                                          encType="multipart/form-data"
                                                   className="space-y-6" onFinish={onFinish}>
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+                                <label htmlFor="title" className="block text-sm font-medium leading-6 text-gray-900">
                                     title
                                 </label>
                                 <div className="mt-2">

@@ -13,6 +13,7 @@ import {
     Image
 } from "@nextui-org/react";
 import NavbarUser from "../auth/NavbarUser.tsx";
+import {useAppSelector} from "../../hooks/redux";
 
 export default function DefaultHeader(): JSX.Element {
     const icons = {
@@ -25,12 +26,13 @@ export default function DefaultHeader(): JSX.Element {
         user: <TagUser className="text-danger" fill="currentColor" size={30} />,
     };
 
+    const {isLogin, isAdmin, user} = useAppSelector(state => state.account);
 
     return (
         <header className="fixed font-serif w-full top-0 z-50 backdrop-filter backdrop-blur-md bg-opacity-30 bg-white">
             <Navbar>
                 <NavbarBrand>
-                    <Image width={"50"} src={"logo.png"}/>
+                    <Image width={"50"} src={"/logo.png"}/>
                     <p className="ml-3 font-bold text-inherit">nostalgia</p>
                 </NavbarBrand>
                 <NavbarContent className="hidden  sm:flex gap-4" justify="center">
@@ -103,7 +105,10 @@ export default function DefaultHeader(): JSX.Element {
                         </Link>
                     </NavbarItem>
                 </NavbarContent>
-                <NavbarContent justify="end">
+                {isLogin ? (
+                    <NavbarContent as="div" justify="end">
+                        <NavbarUser/>
+                    </NavbarContent>) : (<NavbarContent justify="end">
                     <NavbarItem className="hidden  lg:flex">
                         <Link className={"text-yellow-500"} href="login">Login</Link>
                     </NavbarItem>
@@ -112,10 +117,8 @@ export default function DefaultHeader(): JSX.Element {
                             Sign Up
                         </Button>
                     </NavbarItem>
-                </NavbarContent>
-                {/*<NavbarContent as="div" justify="end">*/}
-                {/*    <NavbarUser/>*/}
-                {/*</NavbarContent>*/}
+                </NavbarContent>)}
+
             </Navbar>
         </header>
     );
