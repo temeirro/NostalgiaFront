@@ -76,7 +76,7 @@ export default function AddMemory() {
 
 
             const response = await axios.post(`${baseUrl}/api/Posts/Create`, formData);
-            navigator("/");
+            navigator(-1);
     };
 
     const beforeUpload = (file: File) => {

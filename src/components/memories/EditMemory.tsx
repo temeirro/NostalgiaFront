@@ -13,18 +13,24 @@ import axios from "axios";
 import {APP_ENV} from "../../env";
 import {useAppSelector} from "../../hooks/redux";
 
-export default function ShowMemory() {
+export default function EditMemory() {
     const {isLogin, isAdmin, user} = useAppSelector((state) => state.account);
     const baseUrl = APP_ENV.BASE_URL;
     const navigator = useNavigate();
+    const [categories, setCategories] = useState([]);
+    const [tags, setTags] = useState([]);
+    const [images, setImages] = useState<IImageItem[]>([]);
     const {Id} = useParams();
     const [post, setPost] = useState<any>({}); // Change the type according to your post structure
     const [form] = Form.useForm();
 
     useEffect(() => {
         fetchData();
+        fetchCategories();
+        fetchTags();
     }, []);
 
+    console.log(post);
 
     const fetchData = async () => {
         try {
@@ -43,6 +49,67 @@ export default function ShowMemory() {
             console.error("Error fetching post:", error);
         }
     };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch(`${baseUrl}/api/Categories`);
+            const data = await response.json();
+            setCategories(data);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    };
+
+    const fetchTags = async () => {
+        try {
+            const response = await fetch(`${baseUrl}/api/Tags`);
+            const data = await response.json();
+            setTags(data);
+        } catch (error) {
+            console.error("Error fetching tags:", error);
+        }
+    };
+
+
+    const handleFinish = async (values: any) => {
+        console.log(values);
+        const formData = new FormData();
+
+        formData.append("Title", values.title);
+        formData.append("ShortDescription", values.shortDescription);
+        formData.append("Description", values.description);
+        formData.append("CategoryId", values.categoryId);
+
+        values.tagIds.forEach(tagId => {
+            formData.append('TagIds', tagId);
+        });
+
+
+        const response = await axios.put(`${baseUrl}/api/Posts/Edit/${Id}`, formData);
+        navigator(-1);
+    }
+
+    async function handleDeleteImage(url) {
+        console.log(url);
+        const formData = new FormData();
+        formData.append("imagePath", url); // Assuming the URL contains the image path
+        try {
+            const response = await axios.delete(`${baseUrl}/api/PostImages/DeleteByImagePath`, { data: formData });
+            // Handle success
+        } catch (error) {
+            console.error("Error deleting image:", error);
+        }
+    }
+
+    async function handleAddImage(file: UploadFile<any>) {
+        console.log(file);
+        const formData = new FormData();
+        formData.append("postId", Id);
+        formData.append("imageFile", file);
+        const response = await axios.post(`${baseUrl}/api/PostImages/Create/${Id}`, formData);
+        window.location.reload();
+
+    }
 
     return (
 
@@ -75,7 +142,7 @@ export default function ShowMemory() {
                                     // Same substring at the start will only be typed out once, initially
                                     'nnnnostalgia',
                                     1000, // wait 1s before replacing "Mice" with "Hamsters"
-                                    'showing...',
+                                    'editing...',
                                     5000
                                 ]}
                                 speed={30}
@@ -90,6 +157,7 @@ export default function ShowMemory() {
                             initialValues={{remember: true}}
                             encType="multipart/form-data"
                             className="space-y-6"
+                            onFinish={handleFinish}
                         >
                             <div>
                                 <label htmlFor="title" className="block text-sm font-medium leading-6 text-gray-900">
@@ -98,7 +166,7 @@ export default function ShowMemory() {
                                 <div className="mt-2">
                                     <Form.Item name="title">
                                         {post.title ? (
-                                            <Input disabled defaultValue={post.title}
+                                            <Input defaultValue={post.title}
                                             />
                                         ) : null}
 
@@ -115,7 +183,7 @@ export default function ShowMemory() {
                                 <div className="mt-2">
                                     <Form.Item name={"shortDescription"}>
                                         {post.shortDescription ? (
-                                            <Input disabled
+                                            <Input isDisabled
                                                    type="shortDescription"
                                                    defaultValue={post.shortDescription}
                                                    placeholder="enter short description"
@@ -133,7 +201,7 @@ export default function ShowMemory() {
                                 <div className="mt-2">
                                     <Form.Item name={"description"}>
                                         {post.description ? (
-                                            <Textarea isDisabled
+                                            <Textarea
                                                 label="description"
                                                 defaultValue={post.description}
                                                 placeholder="enter full description"
@@ -150,9 +218,11 @@ export default function ShowMemory() {
                                 <div className="mt-2">
                                     <Form.Item name="categoryId">
                                         {post?.categoryId ? (
-                                            <Select disabled placeholder="select category" defaultValue={post?.categoryId}>
-                                                    <Select.Option
-                                                                   value={post.category.id}>{post.category.name}</Select.Option>
+                                            <Select placeholder="select category" defaultValue={post?.categoryId}>
+                                                {categories.map(category => (
+                                                    <Select.Option key={category.id}
+                                                                   value={category.id}>{category.name}</Select.Option>
+                                                ))}
                                             </Select>
                                         ) : null}
                                     </Form.Item>
@@ -166,16 +236,15 @@ export default function ShowMemory() {
                                 <div className="mt-2">
                                     <Form.Item name="tagIds">
                                         {post.tags ? (
-                                            <Select disabled placeholder="select tags" mode="multiple" defaultValue={post.tags.map(tag => tag.tag.id)}>
-                                                {post.tags.map(tag => (
-                                                    <Select.Option key={tag.tag.id} value={tag.tag.id}>
-                                                        {tag.tag.name}
-                                                    </Select.Option>
+                                            <Select placeholder="select tags" mode="multiple"
+                                                    defaultValue={post.tags.map(tag => tag.tag.id)}>
+                                                {tags.map(tag => (
+                                                    <Select.Option key={tag.id}
+                                                                   value={tag.id}>{tag.name}</Select.Option>
                                                 ))}
                                             </Select>
                                         ) : null}
                                     </Form.Item>
-
                                 </div>
                             </div>
 
@@ -193,12 +262,21 @@ export default function ShowMemory() {
                                         },
                                     ]}
                                 >
-                                    <Upload disabled
+                                    <Upload
                                         name="images"
                                         accept="image/*"
                                         listType="picture"
                                         beforeUpload={() => false} // Return false to prevent file upload in edit mode
+                                        onRemove={(file) => {
+                                            handleDeleteImage(file?.name);
 
+                                        }}
+                                        onChange={({ file }) => {
+
+                                            handleAddImage(file);
+
+
+                                        }}
 
                                     >
                                         <Button icon={<UploadOutlined/>}>Click to upload</Button>
@@ -209,7 +287,12 @@ export default function ShowMemory() {
                             </div>
 
                             <div>
-
+                                <Button htmlType="submit"
+                                        color="default"
+                                        className="flex h-10 items-center w-full justify-center rounded-md bg-red-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
+                                >
+                                    Save
+                                </Button>
                                 <Button
                                     onClick={() => {
                                         navigator(-1);

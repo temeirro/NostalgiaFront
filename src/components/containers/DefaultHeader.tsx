@@ -62,35 +62,35 @@ export default function DefaultHeader(): JSX.Element {
                                 description="ACME scales apps to meet user demand, automagically, based on load."
                                 startContent={icons.scale}
                             >
-                                Autoscaling
+                                [in work]
                             </DropdownItem>
                             <DropdownItem
                                 key="usage_metrics"
                                 description="Real-time metrics to debug issues. Slow query added? We’ll show you exactly where."
                                 startContent={icons.activity}
                             >
-                                Usage Metrics
+                                [in work]
                             </DropdownItem>
                             <DropdownItem
                                 key="production_ready"
                                 description="ACME runs on ACME, join us and others serving requests at web scale."
                                 startContent={icons.flash}
                             >
-                                Production Ready
+                                [in work]
                             </DropdownItem>
                             <DropdownItem
                                 key="99_uptime"
                                 description="Applications stay on the grid with high availability and high uptime guarantees."
                                 startContent={icons.server}
                             >
-                                +99% Uptime
+                                [in work]
                             </DropdownItem>
                             <DropdownItem
                                 key="supreme_support"
                                 description="Overcome any challenge with a supporting team ready to respond."
                                 startContent={icons.user}
                             >
-                                +Supreme Support
+                                [in work]
                             </DropdownItem>
                         </DropdownMenu>
                     </Dropdown>
@@ -110,7 +110,7 @@ export default function DefaultHeader(): JSX.Element {
                         <NavbarUser/>
                     </NavbarContent>) : (<NavbarContent justify="end">
                     <NavbarItem className="hidden  lg:flex">
-                        <Link className={"text-yellow-500"} href="login">Login</Link>
+                        <Link className={"text-yellow-500"} href="/login">Login</Link>
                     </NavbarItem>
                     <NavbarItem>
                         <Button as={Link} color="primary" className={"bg-pink-100 text-yellow-500"} href="register" variant="flat">

@@ -41,7 +41,7 @@ export default function MemoriesPage() {
 
     return (
 
-        <div className={"bg-pink-100 min-h-screen font-serif  "}>
+        <div className={"bg-pink-100 overflow-hidden min-h-screen font-serif  "}>
 
             <div className={"flex border-b border-black shadow justify-center  mt-16 h-52 bg-[#EDCACF]"}>
                 <img

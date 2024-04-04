@@ -26,12 +26,14 @@ import {TrashIcon} from "@heroicons/react/24/outline";
 import {EyeIcon} from "../../iconsNextUI/EyeIcon.tsx";
 import {Col, Modal, Row} from "antd";
 import axios from "axios";
+import {PlusIcon} from "../../iconsNextUI/PlusIcon.tsx";
 
 export default function BoardPage() {
     const {isLogin, isAdmin, user} = useAppSelector(state => state.account);
     const baseUrl = APP_ENV.BASE_URL;
     const [isVisible, setIsVisible] = useState(false);
     const [posts, setPosts] = useState([]);
+    const [acc, setAcc] = useState([]);
     const navigator = useNavigate();
     const { Id } = useParams();
 
@@ -43,8 +45,16 @@ export default function BoardPage() {
             .then(response => response.json())
             .then(data => setPosts(data))
             .catch(error => console.error('Error fetching posts:', error));
+
+            // Fetch users from your API
+            fetch(`${baseUrl}/api/Accounts/Get/${Id}`)
+                .then(response => response.json())
+                .then(data => setAcc(data))
+                .catch(error => console.error('Error fetching acc:', error));
     }, []);
-    console.log(posts);
+
+
+    console.log(acc);
 
     function handleDelete(postId) {
         // Show confirmation modal
@@ -79,9 +89,19 @@ export default function BoardPage() {
         navigator(`/viewMemory/${postId}`)
     }
 
+    function handleEdit(id) {
+        navigator(`/editMemory/${id}`)
+
+    }
+
+    function handleAdd() {
+        navigator(`/add`)
+
+    }
+
     return (
 
-        <div className={"bg-pink-100 min-h-screen font-serif  "}>
+        <div className={"bg-pink-100 overflow-hidden min-h-screen font-serif  "}>
 
             <div className={"flex border-b border-black shadow justify-center  mt-16 h-52 bg-[#EDCACF]"}>
                 <img
@@ -120,7 +140,7 @@ export default function BoardPage() {
                 <div className="flex min-h-full flex-1 flex-col justify-center  lg:px-8">
                     <div className="sm:mx-auto sm:w-full sm:max-w-sm">
 
-                        <div className={"text-center"}>
+                        <div className={"text-center "}>
                             <TypeAnimation
                                 sequence={[
                                     // Same substring at the start will only be typed out once, initially
@@ -133,13 +153,36 @@ export default function BoardPage() {
                                 className="mt-10 text-center text-5xl  leading-9 tracking-tight text-gray-900"
                                 repeat={Infinity}
                             />
+
+
                         </div>
+
                     </div>
                 </div>
             </div>
+<div className={"text-center mt-3"}>
+    <div className={"flex justify-center gap-5"}>
+        <User
+            name={acc.firstName}
+            description={acc.email}
+            avatarProps={{
+                src: `${baseUrl}/uploads/${acc.imagePath}`,
+                // Assuming your user object has an 'avatarUrl' property
+            }}
+        />
+        {user?.Id === Id ? (
+            <Button onClick={handleAdd} isIconOnly className={"bg-gradient-to-br from-red-300 to-yellow-300"} aria-label="Like">
+                <PlusIcon className={"size-6"}/>
+            </Button>
 
+        ) : null}
 
-            <div className="mt-5 border-t border-black flex gap-5 p-5  justify-center mb-4">
+    </div>
+
+</div>
+
+            <div className="mt-5 border-t border-black flex gap-5 p-5  justify-center pb-16">
+
                 <Row gutter={[16, 16]} justify="center">
 
                 {posts.map((post) => (
@@ -160,6 +203,7 @@ export default function BoardPage() {
                                 src={`${baseUrl}/uploads/1200_${post.imagesPath[0]}`}
                                 width={270}
                             />
+                            <p className={"mt-3 text-center"}>{post.description}</p>
                         </CardBody>
                         <CardFooter>
                             <Chip  className="text-tiny bg-red-200 uppercase font-bold">{post.category.name}</Chip>
@@ -173,9 +217,13 @@ export default function BoardPage() {
                                 <Button onClick={() => handleShow(post.id)} isIconOnly className={"bg-yellow-300"} aria-label="Like">
                                     <EyeIcon className={"size-6"}/>
                                 </Button>
-                                <Button isIconOnly className={"bg-blue-300"} aria-label="Like">
-                                    <PenIcon className={"size-8/12"} />
-                                </Button>
+                                {user?.Id === Id ? (
+                                    <Button onClick={() => handleEdit(post.id)} isIconOnly className={"bg-blue-300"} aria-label="Like">
+                                        <PenIcon className={"size-8/12"} />
+                                    </Button>
+
+                                ) : null}
+
                                 {user?.Id === Id ? (
                                     <Button onClick={() => handleDelete(post.id)} isIconOnly className={"bg-purple-300"} aria-label="Like">
                                     <TrashIcon className={"size-8/12"} />
@@ -190,20 +238,7 @@ export default function BoardPage() {
                     </Card>
                     </Col>
 
-                    // <div key={post.id} className="m-2">
-                    //     {/* Render post content here */}
-                    //     <div>
-                    //        <p className={"underline text-3xl"}>{post.title}</p>
-                    //     </div>
-                    //     <div>
-                    //         {post.content}
-                    //     </div>
-                    //     <div>
-                    //         {post?.tags?.map((tag) => (
-                    //             <Chip color={"danger"} key={tag.id}>{tag.tag.name}</Chip>
-                    //         ))}
-                    //     </div>
-                    // </div>
+
                 ))}
                 </Row>
 
