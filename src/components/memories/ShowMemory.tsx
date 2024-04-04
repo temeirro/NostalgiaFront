@@ -1,11 +1,11 @@
-import {Card, CardFooter, Link, Image, Divider} from "@nextui-org/react";
+import {Card, CardFooter, Link, Divider, CardHeader, CardBody, Chip} from "@nextui-org/react";
 import {UploadOutlined} from "@ant-design/icons";
 
 import {ChangeEventHandler, useEffect, useState} from "react";
 
 import {TypeAnimation} from 'react-type-animation';
 import {useNavigate, useParams} from "react-router-dom";
-import {Button, Form, Input, Upload, Select, UploadFile} from "antd";
+import {Button, Form, Input, Upload, Select, UploadFile, Image} from "antd";
 import {PenIcon} from "../../iconsNextUI/PenIcon.tsx";
 import {Textarea} from "@nextui-org/input";
 import {IImageItem} from "../interfaces/auth.ts";
@@ -31,14 +31,7 @@ export default function ShowMemory() {
             const response = await fetch(`${baseUrl}/api/Posts/${Id}`);
             const data = await response.json();
             setPost(data);
-            form.setFieldsValue({
-                title: data.title,
-                shortDescription: data.shortDescription,
-                description: data.description,
-                categoryId: data.categoryId,
-                tagIds: data.tags.map((tag: any) => tag.tag.id),
-                images: data.postImages.map(image => ({url: 'https://localhost:7101/uploads/' + `320_${image.imagePath}`, name: image.imagePath}))
-            });
+            console.log(post);
         } catch (error) {
             console.error("Error fetching post:", error);
         }
@@ -63,10 +56,10 @@ export default function ShowMemory() {
                 </div>
 
                 <div className="flex min-h-full flex-1 flex-col justify-center  lg:px-8">
-                    <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+                    <div className="">
                         <img
-                            className="mx-auto h-20 w-auto rounded-xl"
-                            src="https://i.pinimg.com/564x/99/b8/f6/99b8f6812e5d68ef9ae41b82da9a15af.jpg"
+                            className="mx-auto h-36 w-auto rounded-xl"
+                            src="/viewhead.png"
                             alt="Your Company"
                         />
                         <div className={"text-center mt-5"}>
@@ -85,142 +78,57 @@ export default function ShowMemory() {
                         </div>
 
                         <Divider className="my-4"/>
-                        <Form
-                            form={form}
-                            initialValues={{remember: true}}
-                            encType="multipart/form-data"
-                            className="space-y-6"
+                        <Card className="py-4">
+                            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+                                <p className="text-tiny uppercase font-bold">{post.shortDescription}</p>
+
+                                <small className="text-default-500">
+
+                                    <div className={"mt-3 flex items-center gap-1"}>
+                                        <Chip>Tags</Chip>
+                                        {post?.tags?.map((tag) => (
+                                            <small className="underline text-default-500">{tag.tag.name}</small>
+                                        ))}
+                                    </div>
+                                </small>
+                                <Divider className={"mt-3"}></Divider>
+
+                                <h4 className="font-bold text-large">{post.title}</h4>
+                            </CardHeader>
+                            <CardBody className="overflow-visible py-2">
+                            <div className={"flex gap-3 justify-center items-center"}>
+                                {post.postImages && post.postImages.map((image) => (
+                                    <Image
+                                        key={image.id} // Make sure to provide a unique key for each image
+                                        alt="Post image"
+                                        className="object-cover rounded-xl"
+                                        src={`${baseUrl}/uploads/1200_${image.imagePath}`} // Assuming the image URL is stored in the `url` property
+                                        width={270}
+                                    />
+                                ))}
+
+                            </div>
+                                <p className={"mt-3"}>{post.description}</p>
+                            </CardBody>
+                            <CardHeader className={"flex-col items-start"}>
+                                <Divider></Divider>
+
+                                <div className={"mt-3 flex items-center gap-1"}>
+                                    <Chip className={""}>Category</Chip>
+                                    <small className={"underline text-default-500"}>{post?.category?.name}</small>
+                                </div>
+
+                            </CardHeader>
+                        </Card>
+                        <Button
+                            onClick={() => {
+                                navigator(-1);
+                            }}
+                            color="default"
+                            className="mt-5 h-10 items-center flex w-full justify-center rounded-md bg-gray-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-yellow-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
                         >
-                            <div>
-                                <label htmlFor="title" className="block text-sm font-medium leading-6 text-gray-900">
-                                    title
-                                </label>
-                                <div className="mt-2">
-                                    <Form.Item name="title">
-                                        {post.title ? (
-                                            <Input disabled defaultValue={post.title}
-                                            />
-                                        ) : null}
-
-
-                                    </Form.Item>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label htmlFor="shortDescription"
-                                       className="block text-sm font-medium leading-6 text-gray-900">
-                                    short description
-                                </label>
-                                <div className="mt-2">
-                                    <Form.Item name={"shortDescription"}>
-                                        {post.shortDescription ? (
-                                            <Input disabled
-                                                   type="shortDescription"
-                                                   defaultValue={post.shortDescription}
-                                                   placeholder="enter short description"
-                                            />
-                                        ) : null}
-                                    </Form.Item>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label htmlFor="description"
-                                       className="block text-sm font-medium leading-6 text-gray-900">
-                                    description
-                                </label>
-                                <div className="mt-2">
-                                    <Form.Item name={"description"}>
-                                        {post.description ? (
-                                            <Textarea isDisabled
-                                                label="description"
-                                                defaultValue={post.description}
-                                                placeholder="enter full description"
-                                            />
-                                        ) : null}
-                                    </Form.Item>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium leading-6 text-gray-900">
-                                    category
-                                </label>
-                                <div className="mt-2">
-                                    <Form.Item name="categoryId">
-                                        {post?.categoryId ? (
-                                            <Select disabled placeholder="select category" defaultValue={post?.categoryId}>
-                                                    <Select.Option
-                                                                   value={post.category.id}>{post.category.name}</Select.Option>
-                                            </Select>
-                                        ) : null}
-                                    </Form.Item>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium leading-6 text-gray-900">
-                                    tags
-                                </label>
-                                <div className="mt-2">
-                                    <Form.Item name="tagIds">
-                                        {post.tags ? (
-                                            <Select disabled placeholder="select tags" mode="multiple" defaultValue={post.tags.map(tag => tag.tag.id)}>
-                                                {post.tags.map(tag => (
-                                                    <Select.Option key={tag.tag.id} value={tag.tag.id}>
-                                                        {tag.tag.name}
-                                                    </Select.Option>
-                                                ))}
-                                            </Select>
-                                        ) : null}
-                                    </Form.Item>
-
-                                </div>
-                            </div>
-
-
-                            <div>
-                                <Form.Item
-                                    label="Images"
-                                    name="images"
-                                    valuePropName="fileList"
-                                    getValueFromEvent={(e) => e.fileList}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select at least one image!",
-                                        },
-                                    ]}
-                                >
-                                    <Upload disabled
-                                        name="images"
-                                        accept="image/*"
-                                        listType="picture"
-                                        beforeUpload={() => false} // Return false to prevent file upload in edit mode
-
-
-                                    >
-                                        <Button icon={<UploadOutlined/>}>Click to upload</Button>
-                                    </Upload>
-                                </Form.Item>
-
-
-                            </div>
-
-                            <div>
-
-                                <Button
-                                    onClick={() => {
-                                        navigator(-1);
-                                    }}
-                                    color="default"
-                                    className="mt-5 h-10 items-center flex w-full justify-center rounded-md bg-gray-300 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-yellow-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
-                        </Form>
+                            Cancel
+                        </Button>
                     </div>
 
 
